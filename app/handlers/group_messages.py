@@ -54,8 +54,12 @@ def remove_pending(group_chat_id: int, message_id: int) -> None:
     pending_commitments.pop(key, None)
 
 
-@router.message(F.chat.id == config.group_chat_id)
+@router.message()
 async def handle_group_message(message: Message) -> None:
+    logger.info("Incoming message: chat_id=%d chat_type=%s text=%r", message.chat.id, message.chat.type, (message.text or "")[:50])
+    if message.chat.id != config.group_chat_id:
+        logger.info("Skipping: chat_id=%d != configured group_chat_id=%d", message.chat.id, config.group_chat_id)
+        return
     # Skip messages from bots
     if message.from_user is None or message.from_user.is_bot:
         return
