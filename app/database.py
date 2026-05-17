@@ -16,11 +16,19 @@ _engine = None
 _session_factory = None
 
 
+def _fix_db_url(url: str) -> str:
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+    elif url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    return url
+
+
 def get_engine():
     global _engine
     if _engine is None:
         _engine = create_async_engine(
-            config.database_url,
+            _fix_db_url(config.database_url),
             echo=False,
             pool_pre_ping=True,
             pool_size=10,
